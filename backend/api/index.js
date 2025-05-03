@@ -10,8 +10,19 @@ app.use(express.json());
 app.use(cors());
 
 const client = new MongoClient(process.env.MONGO_URI);
-const db = client.db("studentDB");
-const students = db.collection("students");
+
+// Connect to the DB first
+let students;
+
+client.connect()
+  .then(() => {
+    const db = client.db("studentDB");
+    students = db.collection("students");
+    console.log("✅ Connected to MongoDB");
+  })
+  .catch(err => {
+    console.error("❌ MongoDB Connection Failed:", err);
+  });
 
 // ➕ Add student
 app.post("/students", async (req, res) => {
@@ -49,6 +60,8 @@ app.delete("/students/:id", async (req, res) => {
   res.json({ message: "Student deleted" });
 });
 
-app.listen(process.env.PORT || 5000, () => {
-  console.log("Server running on port", process.env.PORT);
+// ✅ Start Server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
